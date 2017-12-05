@@ -1,9 +1,8 @@
 import axios from 'axios'
 
 axios.defaults.baseURL = '/map_editor/api/'
-axios.defaults.headers = {
-  'x-requested-with': 'XMLHttpRequest'
-}
+axios.defaults.headers['x-requested-with'] = 'XMLHttpRequest'
+// axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8'//'application/x-www-form-urlencoded'
 axios.defaults.timeout = 60000
 const CancelToken = axios.CancelToken
 
@@ -36,6 +35,18 @@ const ajax = function (path, params, options, type) {
       options.params = params
     } else {
       options.data = params
+      options.transformRequest = [function (data, config) {
+        if (data && config.post['Content-Type'].indexOf('application/x-www-form-urlencoded') > -1) {
+          let str = ''
+          for (let key in data) {
+            str += '&' + key + '=' + data[key]
+          }
+          if (str) {
+            return str.substr(1)
+          }
+        }
+        return JSON.stringify(data)
+      }]
     }
     axios(options).then((res) => {
       if (context) {

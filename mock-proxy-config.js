@@ -7,7 +7,7 @@ module.exports = {
     '/map_editor/api/editor/data': 1
   },
   proxyInfo: {
-    host: '10.94.97.203',
+    // host: '10.94.97.203',
     port: '8088'
   },
   mockPath: 'mock'
