@@ -6,6 +6,13 @@ axios.defaults.headers['x-requested-with'] = 'XMLHttpRequest'
 axios.defaults.timeout = 60000
 const CancelToken = axios.CancelToken
 
+/**
+  * the entrance for ajax api call
+  * @param {string} path the url of api
+  * @param {object} params the args for api
+  * @param {object} object config ajax
+  * @param {element} object.target loading mask the element
+  */
 const ajax = function (path, params, options, type) {
   let cancel
   let context = options.context
@@ -39,7 +46,7 @@ const ajax = function (path, params, options, type) {
         if (data && config.post['Content-Type'].indexOf('application/x-www-form-urlencoded') > -1) {
           let str = ''
           for (let key in data) {
-            str += '&' + key + '=' + data[key]
+            str += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(data[key])
           }
           if (str) {
             return str.substr(1)
@@ -50,9 +57,7 @@ const ajax = function (path, params, options, type) {
     }
     axios(options).then((res) => {
       if (context) {
-        let loadingCount = context.dataset._loadingCount || 0
-        context.dataset._loadingCount = --loadingCount
-        if (loadingCount <= 0) {
+        if (--context.dataset._loadingCount <= 0) {
           context.classList.remove('loading')
           let mask = context.querySelector('.mask')
           if (mask) {
@@ -65,17 +70,19 @@ const ajax = function (path, params, options, type) {
       let code = resp.code
       if (code === 302) { // to login
       } else if (code === 403) { // to auth
-      } else if (code === 200) {
+      } else if (code === 200 || code === 0) {
         resolve(resp)
       } else {
         reject(resp)
       }
     }).catch((e) => {
       if (context) {
-        let loadingCount = context.dataset._loadingCount || 0
-        context.dataset._loadingCount = --loadingCount
-        if (loadingCount <= 0) {
+        if (--context.dataset._loadingCount <= 0) {
           context.classList.remove('loading')
+          let mask = context.querySelector('.mask')
+          if (mask) {
+            context.removeChild(mask)
+          }
           delete options.context
         }
       }
